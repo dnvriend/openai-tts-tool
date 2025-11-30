@@ -14,21 +14,12 @@ import sys
 def setup_logging(verbose_count: int = 0) -> None:
     """Configure logging based on verbosity level.
 
-    Maps CLI verbosity count to Python logging levels and configures
-    both application and dependent library loggers.
-
     Args:
         verbose_count: Number of -v flags (0-3+)
             0: WARNING level (quiet mode)
             1: INFO level (normal verbose)
             2: DEBUG level (detailed debugging)
             3+: DEBUG + enable dependent library logging (trace mode)
-
-    Example:
-        >>> setup_logging(0)  # No -v flag: WARNING only
-        >>> setup_logging(1)  # -v: INFO level
-        >>> setup_logging(2)  # -vv: DEBUG level
-        >>> setup_logging(3)  # -vvv: DEBUG + library internals
     """
     # Map verbosity count to logging levels
     if verbose_count == 0:
@@ -40,20 +31,33 @@ def setup_logging(verbose_count: int = 0) -> None:
     else:
         level = logging.WARNING
 
+    # Configure format - all levels include module name for traceability
+    if verbose_count >= 2:
+        # Detailed format for DEBUG (includes line number)
+        fmt = "[%(levelname)s] %(name)s:%(lineno)d - %(message)s"
+    else:
+        # Standard format for INFO/WARNING (module name, no line number)
+        fmt = "[%(levelname)s] %(name)s - %(message)s"
+
     # Configure root logger
     logging.basicConfig(
         level=level,
-        format="[%(levelname)s] %(message)s",
+        format=fmt,
         stream=sys.stderr,
-        force=True,  # Override any existing configuration
+        force=True,
     )
 
     # Configure dependent library loggers at TRACE level (-vvv)
-    # Add your project-specific library loggers here
-    # Example:
-    #   if verbose_count >= 3:
-    #       logging.getLogger("requests").setLevel(logging.DEBUG)
-    #       logging.getLogger("urllib3").setLevel(logging.DEBUG)
+    if verbose_count >= 3:
+        # Add project-specific libraries here
+        logging.getLogger("openai").setLevel(logging.DEBUG)
+        logging.getLogger("urllib3").setLevel(logging.DEBUG)
+        logging.getLogger("httpx").setLevel(logging.DEBUG)
+    else:
+        # Suppress noisy libraries at lower verbosity levels
+        logging.getLogger("openai").setLevel(logging.WARNING)
+        logging.getLogger("urllib3").setLevel(logging.WARNING)
+        logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def get_logger(name: str) -> logging.Logger:

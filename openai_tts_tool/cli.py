@@ -6,40 +6,76 @@ and has been reviewed and tested by a human.
 
 import click
 
-from openai_tts_tool.completion import completion_command
+from openai_tts_tool.commands import (
+    completion,
+    info_command,
+    list_models_command,
+    list_voices_command,
+    synthesize,
+)
 from openai_tts_tool.logging_config import get_logger, setup_logging
-from openai_tts_tool.utils import get_greeting
 
 logger = get_logger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group()
 @click.option(
     "-v",
     "--verbose",
     count=True,
-    help="Enable verbose output (use -v for INFO, -vv for DEBUG, -vvv for TRACE)",
+    help="Verbose output: -v (INFO), -vv (DEBUG), -vvv (TRACE with library logs)",
 )
 @click.version_option(version="0.1.0")
-@click.pass_context
-def main(ctx: click.Context, verbose: int) -> None:
-    """A CLI that provides tts using OpenAI"""
+def main(verbose: int) -> None:
+    """OpenAI Text-to-Speech CLI Tool.
+
+    A powerful command-line interface for converting text to speech using OpenAI's
+    advanced TTS models. Supports multiple voices, languages, and output formats.
+
+    Quick Start:
+
+    \b
+        # Basic text-to-speech conversion
+        openai-tts-tool synthesize "Hello, world!" output.mp3
+
+    \b
+        # List available voices
+        openai-tts-tool list-voices
+
+    \b
+        # List available models
+        openai-tts-tool list-models
+
+    \b
+        # Show system information
+        openai-tts-tool info
+
+    \b
+    Examples:
+
+        # Synthesize with specific voice
+        openai-tts-tool synthesize "Hello world" hello.mp3 --voice alloy --speed 1.2
+
+        # Different output formats
+        openai-tts-tool synthesize text.txt speech.mp3
+        openai-tts-tool synthesize text.txt speech.opus --model tts-1-hd
+
+        # Verbose output for debugging
+        openai-tts-tool -vv synthesize "Test" test.mp3
+
+        # Pipe input from other commands
+        echo "Hello" | openai-tts-tool synthesize - output.mp3
+    """
     # Setup logging based on verbosity count
     setup_logging(verbose)
 
-    # If no subcommand is provided, run the default behavior
-    if ctx.invoked_subcommand is None:
-        logger.info("openai-tts-tool started")
-        logger.debug("Running with verbose level: %d", verbose)
 
-        greeting = get_greeting()
-        click.echo(greeting)
-
-        logger.info("openai-tts-tool completed")
-
-
-# Add completion subcommand
-main.add_command(completion_command)
+# Register all commands
+main.add_command(synthesize)
+main.add_command(list_voices_command, name="list-voices")
+main.add_command(list_models_command, name="list-models")
+main.add_command(info_command, name="info")
+main.add_command(completion)
 
 
 if __name__ == "__main__":

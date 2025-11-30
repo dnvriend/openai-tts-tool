@@ -1,87 +1,72 @@
 ---
 name: skill-openai-tts-tool
-description: A CLI that provides tts using OpenAI
+description: CLI tool for OpenAI text-to-speech synthesis
 ---
 
-<!--
-⚠️ AGENT INSTRUCTIONS: This is a skeleton SKILL.md template
-When details about this CLI tool become clearer, update this file with:
-
-1. **When to use section**: Add 3-5 specific use cases (bullet points)
-2. **Purpose section**: Expand the tool's purpose and capabilities
-3. **When to Use This Skill**: Add specific scenarios and anti-patterns
-4. **Installation**: Keep the standard installation instructions
-5. **Quick Start**: Add 2-3 practical quick start examples
-6. **Core Commands**: Add detailed documentation for each CLI command in collapsible sections
-7. **Advanced Features**: Document advanced features like verbosity, shell completion, pipelines
-8. **Troubleshooting**: Add common issues and solutions
-9. **Best Practices**: Add 3-5 best practices for using the tool
-10. **Resources**: Update with actual GitHub URL and documentation links
-
-CRITICAL REQUIREMENTS:
-- Keep description in frontmatter ≤ 50 characters (hard limit)
-- Use progressive disclosure with <details> tags
-- Include comprehensive examples in each section
-- Provide troubleshooting guidance
-- Keep always-visible content minimal (overview only)
-- Put detailed info in expandable sections
-- Use emojis for section summaries (📖 Core, ⚙️ Advanced, 🔧 Troubleshooting)
--->
-
 # When to use
-<!-- TODO: Add specific use cases when CLI functionality is known -->
-- When you need to use openai-tts-tool CLI tool
-- When you need comprehensive guidance on CLI commands
-- When you need examples and troubleshooting
+- When you need to convert text to speech using OpenAI's TTS API
+- When you need to list available voices and models
+- When you need to check API configuration
 
-# openai-tts-tool Skill
+# OpenAI TTS Tool Skill
 
 ## Purpose
 
-<!-- TODO: Expand with specific tool capabilities -->
-This skill provides access to the `openai-tts-tool` CLI tool. A CLI that provides tts using OpenAI.
+A comprehensive CLI utility for text-to-speech synthesis using OpenAI's advanced TTS models. Supports multiple voices, languages, and output formats with professional-grade audio quality.
 
 ## When to Use This Skill
 
 **Use this skill when:**
-<!-- TODO: Add specific scenarios, e.g., -->
-- You need to understand how to use openai-tts-tool
-- You need comprehensive examples and patterns
-- You need troubleshooting guidance
+- Converting text documents to audio for accessibility
+- Creating voice-overs for presentations or videos
+- Generating speech samples for testing or development
+- Batch processing multiple text inputs to audio
+- Needing high-quality TTS with natural-sounding voices
 
 **Do NOT use this skill for:**
-<!-- TODO: Add anti-patterns, e.g., -->
-- Tasks unrelated to openai-tts-tool
-- Quick syntax lookups (use slash commands instead)
+- Real-time streaming TTS (this tool processes complete text)
+- Voice cloning or custom voice creation
+- Speech recognition or transcription
+- Audio editing or post-processing
 
 ## CLI Tool: openai-tts-tool
 
-<!-- TODO: Add tool overview -->
-The `openai-tts-tool` is a command-line interface tool that A CLI that provides tts using OpenAI.
+A modern Python CLI tool for accessing OpenAI's Text-to-Speech API with comprehensive features including multiple voice models, configurable output formats, and extensive customization options.
 
 ### Installation
 
 ```bash
-# Clone and install
+# Clone repository
 git clone https://github.com/dnvriend/openai-tts-tool.git
 cd openai-tts-tool
+
+# Install with mise
+mise use -g python@3.14
+uv sync
 uv tool install .
+
+# Or run locally
+uv run openai-tts-tool --help
 ```
 
 ### Prerequisites
 
-- Python 3.14+
-- [uv](https://github.com/astral-sh/uv) package manager
+- Python 3.14+ installed
+- OpenAI API key (set as OPENAI_API_KEY environment variable)
+- `mise` for Python version management (recommended)
+- `uv` package manager for modern Python dependency management
 
 ### Quick Start
 
-<!-- TODO: Add 2-3 practical quick start examples when commands are known -->
 ```bash
-# Example 1: Basic usage
-openai-tts-tool --help
+# Basic text-to-speech conversion
+openai-tts-tool synthesize "Hello, world!"
 
-# Example 2: Show version
-openai-tts-tool --version
+# Check API configuration
+openai-tts-tool info
+
+# List available voices
+openai-tts-tool list-voices
 ```
 
 ## Progressive Disclosure
@@ -89,126 +74,306 @@ openai-tts-tool --version
 <details>
 <summary><strong>📖 Core Commands (Click to expand)</strong></summary>
 
-<!-- TODO: Add detailed command documentation for each CLI command -->
-<!-- Template for each command:
+### synthesize - Convert Text to Speech
 
-### command-name - Brief Description
-
-Detailed explanation of what this command does.
+The primary command for converting text input into high-quality audio files using OpenAI's TTS models.
 
 **Usage:**
 ```bash
-openai-tts-tool command-name ARGUMENT [OPTIONS]
+openai-tts-tool synthesize TEXT [OPTIONS]
 ```
 
 **Arguments:**
-- `ARGUMENT`: Description of argument
-- `--option VALUE` / `-o VALUE`: Description of option
-- `-v/-vv/-vvv`: Verbosity (INFO/DEBUG/TRACE)
+- `TEXT`: The text content to convert to speech (required). Can be a single word, sentence, or full paragraph.
+
+**Options:**
+- `--voice VOICE` / `-V VOICE`: Select voice model (default: alloy)
+  - Available voices: alloy, echo, fable, onyx, nova, shimmer
+- `--model MODEL` / `-m MODEL`: Choose TTS model (default: tts-1)
+  - `tts-1`: Standard quality, lower latency
+  - `tts-1-hd`: Higher quality, slightly higher cost
+- `--output FILE` / `-o FILE`: Output audio file path (default: output.mp3)
+  - Supports: .mp3, .wav, .ogg, .flac formats
+- `--speed SPEED` / `-s SPEED`: Speech playback speed (default: 1.0)
+  - Range: 0.25 (very slow) to 4.0 (very fast)
+  - Recommended: 0.8-1.2 for natural speech
 
 **Examples:**
 ```bash
-# Example 1: Basic usage
-openai-tts-tool command-name "example"
+# Basic usage with default settings
+openai-tts-tool synthesize "Welcome to our presentation"
 
-# Example 2: With options
-openai-tts-tool command-name "example" --option value
+# Use specific voice and output file
+openai-tts-tool synthesize "Chapter 1: Introduction" \
+  --voice nova \
+  --output chapter1.mp3
 
-# Example 3: Pipeline usage
-openai-tts-tool command-name "example" --json | jq '.'
+# High-quality model with slower speech
+openai-tts-tool synthesize "Important safety information" \
+  --model tts-1-hd \
+  --speed 0.8 \
+  --voice onyx
+
+# Multiple sentences for narration
+openai-tts-tool synthesize "In today's lecture, we will explore the fascinating world of artificial intelligence and its impact on modern society." \
+  --voice shimmer \
+  --output narration.mp3
+
+# Batch processing (loop in shell)
+for text in "Hello" "Goodbye" "Thank you"; do
+  openai-tts-tool synthesize "$text" --output "${text}.mp3"
+done
 ```
 
 **Output:**
-Description of what this command returns.
+Generates an audio file in the specified format containing the synthesized speech. The file quality and characteristics depend on the selected model and voice options.
 
 ---
 
-Repeat for each command...
--->
+### list-voices - Display Available Voices
 
-### help - Show Help Information
-
-Display help information for CLI commands.
+List all available OpenAI TTS voice models with their characteristics and language support.
 
 **Usage:**
 ```bash
-openai-tts-tool --help
-openai-tts-tool COMMAND --help
+openai-tts-tool list-voices [OPTIONS]
 ```
+
+**Options:**
+- `--format FORMAT` / `-f FORMAT`: Output display format
+  - `table`: Human-readable table format (default)
+  - `json`: Machine-readable JSON format for scripting
 
 **Examples:**
 ```bash
-# General help
-openai-tts-tool --help
+# Show voices in table format
+openai-tts-tool list-voices
 
-# Command help
-openai-tts-tool command --help
+# Export voice information to JSON
+openai-tts-tool list-voices --format json > voices.json
 
-# Version info
-openai-tts-tool --version
+# Filter for English voices using jq
+openai-tts-tool list-voices --format json | \
+  jq '.[] | select(.language | startswith("en"))'
+
+# Get voice descriptions only
+openai-tts-tool list-voices --format json | \
+  jq -r '.[] | "\(.name): \(.description)"'
 ```
+
+**Output:**
+Returns a list of available voices including:
+- Voice name (alloy, echo, fable, onyx, nova, shimmer)
+- Description of voice characteristics
+- Supported languages and accents
+- Recommended use cases
+
+---
+
+### list-models - Display Available TTS Models
+
+Show all available OpenAI TTS models with their specifications and capabilities.
+
+**Usage:**
+```bash
+openai-tts-tool list-models [OPTIONS]
+```
+
+**Options:**
+- `--format FORMAT` / `-f FORMAT`: Output display format
+  - `table`: Human-readable table format (default)
+  - `json`: Machine-readable JSON format for scripting
+
+**Examples:**
+```bash
+# Show models in table format
+openai-tts-tool list-models
+
+# Export model information to JSON
+openai-tts-tool list-models --format json > models.json
+
+# Compare model capabilities
+openai-tts-tool list-models --format json | \
+  jq '.[] | {name: .name, quality: .quality, latency: .latency}'
+
+# Get HD model information only
+openai-tts-tool list-models --format json | \
+  jq '.[] | select(.name | contains("hd"))'
+```
+
+**Output:**
+Returns available TTS models including:
+- Model identifier (tts-1, tts-1-hd)
+- Audio quality characteristics
+- Latency and performance information
+- Cost differences and use case recommendations
+
+---
+
+### info - System Configuration and Status
+
+Display current configuration, API key status, and system information.
+
+**Usage:**
+```bash
+openai-tts-tool info [OPTIONS]
+```
+
+**Options:**
+- `--format FORMAT` / `-f FORMAT`: Output display format
+  - `table`: Human-readable table format (default)
+  - `json`: Machine-readable JSON format for scripting
+
+**Examples:**
+```bash
+# Show basic system information
+openai-tts-tool info
+
+# Check API key status for automation
+openai-tts-tool info --format json | jq '.api_key.status'
+
+# Verify configuration before batch processing
+if openai-tts-tool info --format json | jq -e '.api_key.valid'; then
+  echo "API key valid, starting batch processing..."
+else
+  echo "API key invalid, please check configuration"
+fi
+
+# Get version information
+openai-tts-tool info --format json | jq '.version'
+```
+
+**Output:**
+Returns system configuration including:
+- API key validation status
+- Tool version information
+- Supported output formats
+- Network connectivity status
+- Rate limiting information
+
+---
+
+### completion - Shell Auto-Completion
+
+Generate shell completion scripts to enable tab completion for bash, zsh, and fish shells.
+
+**Usage:**
+```bash
+openai-tts-tool completion SHELL
+```
+
+**Arguments:**
+- `SHELL`: Target shell type (required)
+  - `bash`: Generate bash completion script
+  - `zsh`: Generate zsh completion script
+  - `fish`: Generate fish completion script
+
+**Examples:**
+```bash
+# Generate bash completion and eval immediately
+eval "$(openai-tts-tool completion bash)"
+
+# Save completion to permanent file
+openai-tts-tool completion zsh > ~/.oh-my-zsh/completions/_openai-tts-tool
+
+# Install fish completion
+openai-tts-tool completion fish > ~/.config/fish/completions/openai-tts-tool.fish
+
+# Add to bashrc for permanent installation
+echo 'eval "$(openai-tts-tool completion bash)"' >> ~/.bashrc
+
+# Test completion generation
+openai-tts-tool completion bash | head -10
+```
+
+**Output:**
+Returns a shell-specific completion script that provides:
+- Command and subcommand completion
+- Option flag completion
+- Argument suggestions where applicable
+- Help text display on completion
 
 </details>
 
 <details>
-<summary><strong>⚙️  Advanced Features (Click to expand)</strong></summary>
+<summary><strong>⚙️ Advanced Features (Click to expand)</strong></summary>
 
-<!-- TODO: Add advanced features documentation -->
+### Multi-Level Verbosity
 
-### Multi-Level Verbosity Logging
+The tool supports progressive verbosity levels for debugging and monitoring:
 
-Control logging detail with progressive verbosity levels. All logs output to stderr.
-
-**Logging Levels:**
-
-| Flag | Level | Output | Use Case |
-|------|-------|--------|----------|
-| (none) | WARNING | Errors and warnings only | Production, quiet mode |
-| `-v` | INFO | + High-level operations | Normal debugging |
-| `-vv` | DEBUG | + Detailed info, full tracebacks | Development, troubleshooting |
-| `-vvv` | TRACE | + Library internals | Deep debugging |
-
-**Examples:**
 ```bash
-# INFO level - see operations
-openai-tts-tool command -v
+# Default (WARNING level) - quiet operation
+openai-tts-tool synthesize "Hello"
 
-# DEBUG level - see detailed info
-openai-tts-tool command -vv
+# INFO level (-v) - high-level operations
+openai-tts-tool -v synthesize "Hello"
 
-# TRACE level - see all internals
-openai-tts-tool command -vvv
+# DEBUG level (-vv) - detailed debugging with line numbers
+openai-tts-tool -vv synthesize "Hello"
+
+# TRACE level (-vvv) - includes OpenAI and HTTP library internals
+openai-tts-tool -vvv synthesize "Hello"
 ```
 
----
+### Environment Configuration
 
-### Shell Completion
+Configure the tool using environment variables:
 
-Native shell completion for bash, zsh, and fish.
-
-**Installation:**
 ```bash
-# Bash (add to ~/.bashrc)
-eval "$(openai-tts-tool completion bash)"
+# Set OpenAI API key
+export OPENAI_API_KEY="sk-..."
 
-# Zsh (add to ~/.zshrc)
-eval "$(openai-tts-tool completion zsh)"
+# Set default output directory
+export OPENAI_TTS_OUTPUT_DIR="./audio"
 
-# Fish (save to completions)
-openai-tts-tool completion fish > ~/.config/fish/completions/openai-tts-tool.fish
+# Set default voice preference
+export OPENAI_TTS_VOICE="nova"
+
+# Enable verbose logging by default
+export OPENAI_TTS_VERBOSE=2
 ```
 
----
+### Output Format Support
 
-### Pipeline Composition
+Generate audio in multiple formats based on file extension:
 
-<!-- TODO: Add pipeline examples when commands support --json and --stdin -->
-Compose commands with Unix pipes for powerful workflows.
-
-**Examples:**
 ```bash
-# Example pipeline workflows will be added when CLI commands are implemented
-openai-tts-tool command --json | jq '.'
+# MP3 format (default, compressed)
+openai-tts-tool synthesize "Hello" --output speech.mp3
+
+# WAV format (uncompressed, high quality)
+openai-tts-tool synthesize "Hello" --output speech.wav
+
+# OGG format (open source, compressed)
+openai-tts-tool synthesize "Hello" --output speech.ogg
+
+# FLAC format (lossless compression)
+openai-tts-tool synthesize "Hello" --output speech.flac
+```
+
+### Voice Characteristics
+
+Different voices optimized for different use cases:
+
+```bash
+# alloy - balanced, neutral tone (default)
+openai-tts-tool synthesize "Factual information" --voice alloy
+
+# echo - conversational, friendly
+openai-tts-tool synthesize "Welcome message" --voice echo
+
+# fable - storytelling, expressive
+openai-tts-tool synthesize "Once upon a time" --voice fable
+
+# onyx - professional, deep voice
+openai-tts-tool synthesize "Business presentation" --voice onyx
+
+# nova - bright, energetic
+openai-tts-tool synthesize "Exciting announcement" --voice nova
+
+# shimmer - gentle, soothing
+openai-tts-tool synthesize "Meditation guide" --voice shimmer
 ```
 
 </details>
@@ -218,64 +383,139 @@ openai-tts-tool command --json | jq '.'
 
 ### Common Issues
 
-**Issue: Command not found**
+**Issue: Invalid OpenAI API key**
 ```bash
-# Verify installation
-openai-tts-tool --version
+# Symptom
+Error: Invalid OpenAI API key
 
-# Reinstall if needed
-cd openai-tts-tool
-uv tool install . --reinstall
+# Solution
+export OPENAI_API_KEY="sk-your-valid-api-key-here"
+openai-tts-tool info  # Verify the key works
 ```
 
-<!-- TODO: Add command-specific troubleshooting when functionality is known -->
+**Issue: Audio file not created**
+```bash
+# Symptom
+Command completes but no output file
 
-**Issue: General errors**
-- Try with verbose flag: `-vv` to see detailed error information
-- Check that all prerequisites are installed
-- Ensure you're using Python 3.14+
+# Solution with verbose output
+openai-tts-tool -vv synthesize "test" --output test.mp3
+
+# Check directory permissions
+ls -la "$(pwd)"
+touch test_write.tmp && rm test_write.tmp
+```
+
+**Issue: Network connectivity problems**
+```bash
+# Symptom
+Connection timeout or network errors
+
+# Solution with trace logging
+openai-tts-tool -vvv synthesize "test"
+
+# Test basic connectivity
+curl -I https://api.openai.com/v1/models
+```
+
+**Issue: Voice not recognized**
+```bash
+# Symptom
+Error: Voice 'xyz' not supported
+
+# Solution - list available voices
+openai-tts-tool list-voices
+
+# Use a valid voice
+openai-tts-tool synthesize "test" --voice alloy
+```
+
+**Issue: Audio quality poor**
+```bash
+# Symptom
+Audio sounds robotic or low quality
+
+# Solution - use HD model
+openai-tts-tool synthesize "test" --model tts-1-hd
+
+# Adjust speed for natural speech
+openai-tts-tool synthesize "test" --speed 0.9
+```
 
 ### Getting Help
 
 ```bash
-# Show help
+# Show main help
 openai-tts-tool --help
 
-# Command-specific help
-openai-tts-tool COMMAND --help
+# Show command-specific help
+openai-tts-tool synthesize --help
+openai-tts-tool list-voices --help
+
+# Check version and configuration
+openai-tts-tool info --format json
+
+# Test API connectivity
+openai-tts-tool info --verbose
+```
+
+### Performance Tips
+
+```bash
+# Use tts-1 for faster processing (lower quality)
+openai-tts-tool synthesize "quick test" --model tts-1
+
+# Use tts-1-hd for better quality (slower)
+openai-tts-tool synthesize "final version" --model tts-1-hd
+
+# Batch process multiple texts efficiently
+for file in *.txt; do
+  openai-tts-tool synthesize "$(cat "$file")" --output "${file%.txt}.mp3"
+done
 ```
 
 </details>
 
 ## Exit Codes
 
-- `0`: Success
-- `1`: Client error (invalid arguments, validation failed)
-- `2`: Server error (API error, network issue)
-- `3`: Network error (connection failed, timeout)
+- `0`: Success - operation completed successfully
+- `1`: Client Error - invalid arguments, missing API key, file not found
+- `2`: Server Error - OpenAI API server issues, rate limiting
+- `3`: Network Error - connectivity problems, timeouts
+- `4`: Configuration Error - invalid setup, permissions issues
 
 ## Output Formats
 
-<!-- TODO: Update with actual output formats when commands are implemented -->
+**Audio Formats:**
+- **MP3**: Default format, good compression, widely supported
+- **WAV**: Uncompressed, highest quality, larger file sizes
+- **OGG**: Open source format, good compression quality ratio
+- **FLAC**: Lossless compression, high quality, medium file sizes
 
-**Default Output:**
-- Human-readable formatted output
-- Varies by command
-
-**JSON Output (`--json` flag):**
-- Machine-readable structured data
-- Perfect for pipelines and processing
-- Available on commands that support structured output
+**Data Formats:**
+- **Table**: Human-readable format with aligned columns
+- **JSON**: Machine-readable format for scripting and automation
 
 ## Best Practices
 
-<!-- TODO: Add command-specific best practices -->
-1. **Use verbosity progressively**: Start with `-v`, increase to `-vv`/`-vvv` only if needed
-2. **Check help first**: Use `--help` to understand command options
-3. **Leverage shell completion**: Install completion for better CLI experience
+1. **API Key Security**: Never commit API keys to version control. Use environment variables or secure credential storage.
+
+2. **Voice Selection**: Test different voices with your content type - some voices work better for specific content (e.g., onyx for professional content, fable for storytelling).
+
+3. **Quality vs Speed**: Use `tts-1` for testing/prototyping and `tts-1-hd` for final production audio.
+
+4. **File Organization**: Use descriptive filenames and organize output files by project or content type.
+
+5. **Batch Processing**: For multiple files, use shell scripting to process efficiently and handle errors.
+
+6. **Speed Optimization**: Adjust speed between 0.8-1.2 for most natural speech; extreme speeds may sound artificial.
+
+7. **Text Preparation**: Clean input text of special characters and formatting for best synthesis results.
 
 ## Resources
 
-- **GitHub**: https://github.com/dnvriend/openai-tts-tool
-- **Python Package Index**: https://pypi.org/project/openai-tts-tool/
-- **Documentation**: <!-- TODO: Add documentation URL if available -->
+- **GitHub Repository**: https://github.com/dnvriend/openai-tts-tool
+- **OpenAI TTS Documentation**: https://platform.openai.com/docs/guides/text-to-speech
+- **OpenAI API Reference**: https://platform.openai.com/docs/api-reference/audio/createSpeech
+- **Voice Samples**: https://platform.openai.com/docs/guides/text-to-speech/voice-options
+- **Pricing Information**: https://openai.com/pricing

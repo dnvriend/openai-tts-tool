@@ -29,20 +29,28 @@ A CLI that provides tts using OpenAI
 - `pip-audit` - Dependency vulnerability scanning
 - `gitleaks` - Secret detection (requires separate installation)
 
-## CLI Arguments
+## CLI Commands
 
 ```bash
-openai-tts-tool [OPTIONS]
+openai-tts-tool [GLOBAL_OPTIONS] COMMAND [COMMAND_OPTIONS]
 ```
 
-### Options
+### Global Options
 
-- `-v, --verbose` - Enable verbose output (count flag: -v, -vv, -vvv)
-  - `-v` (count=1): INFO level logging
-  - `-vv` (count=2): DEBUG level logging
-  - `-vvv` (count=3+): TRACE level (includes library internals)
+- `-v, --verbose` - Multi-level verbosity (count flag: -v, -vv, -vvv)
+  - `-v` (count=1): INFO level logging - high-level operations
+  - `-vv` (count=2): DEBUG level logging - detailed debugging with line numbers
+  - `-vvv` (count=3+): TRACE level - includes library internals (OpenAI, urllib3, httpx)
 - `--help` / `-h` - Show help message
 - `--version` - Show version
+
+### Commands
+
+- `synthesize TEXT` - Convert text to speech (main functionality)
+- `list-voices` - Display available TTS voices with descriptions
+- `list-models` - Display available TTS models with characteristics
+- `info` - Show system configuration and API key status
+- `completion SHELL` - Generate shell completion scripts (bash, zsh, fish)
 
 ## Project Structure
 
@@ -50,10 +58,23 @@ openai-tts-tool [OPTIONS]
 openai-tts-tool/
 ├── openai_tts_tool/
 │   ├── __init__.py
-│   ├── cli.py            # Click CLI entry point (group with subcommands)
+│   ├── cli.py            # Click CLI entry point with logging setup
 │   ├── completion.py     # Shell completion command
-│   ├── logging_config.py # Multi-level verbosity logging
-│   └── utils.py          # Utility functions
+│   ├── logging_config.py # Multi-level verbosity logging with library support
+│   ├── utils.py          # Utility functions
+│   ├── commands/         # CLI command implementations
+│   │   ├── __init__.py
+│   │   ├── synthesize_commands.py  # Main TTS functionality
+│   │   ├── voice_commands.py       # Voice listing commands
+│   │   ├── model_commands.py       # Model listing commands
+│   │   ├── info_commands.py        # System info command
+│   │   └── completion_commands.py  # Shell completion
+│   ├── core/            # Core business logic
+│   │   ├── __init__.py
+│   │   ├── synthesize.py  # TTS synthesis functions
+│   │   ├── client.py      # OpenAI client management
+│   ├── voices.py         # Voice definitions and validation
+│   └── models.py         # Model definitions and validation
 ├── tests/
 │   ├── __init__.py
 │   └── test_utils.py
@@ -135,26 +156,32 @@ The template includes a centralized logging system with progressive verbosity le
    - `setup_logging(verbose_count)` - Configure logging based on -v count
    - `get_logger(name)` - Get logger instance for module
    - Maps verbosity to Python logging levels (WARNING/INFO/DEBUG)
+   - Configures library logging at TRACE level (-vvv)
 
-2. **CLI Integration** - Add to every CLI command
+2. **CLI Integration** - Centralized in main CLI group
    ```python
-   from openai_tts_tool.logging_config import get_logger, setup_logging
+   # Main CLI group handles logging setup
+   @click.group()
+   @click.option("-v", "--verbose", count=True)
+   def main(verbose: int):
+       setup_logging(verbose)  # Single point of logging setup
+
+   # Individual commands just use the logger
+   from openai_tts_tool.logging_config import get_logger
 
    logger = get_logger(__name__)
 
    @click.command()
-   @click.option("-v", "--verbose", count=True, help="...")
-   def command(verbose: int):
-       setup_logging(verbose)  # First thing in command
+   def command():
        logger.info("Operation started")
        logger.debug("Detailed info")
    ```
 
 3. **Logging Levels**
    - **0 (no -v)**: WARNING only - production/quiet mode
-   - **1 (-v)**: INFO - high-level operations
-   - **2 (-vv)**: DEBUG - detailed debugging
-   - **3+ (-vvv)**: TRACE - enable library internals
+   - **1 (-v)**: INFO - high-level operations (module names only)
+   - **2 (-vv)**: DEBUG - detailed debugging with line numbers
+   - **3+ (-vvv)**: TRACE - includes OpenAI, urllib3, httpx library internals
 
 4. **Best Practices**
    - Always log to stderr (keeps stdout clean for piping)

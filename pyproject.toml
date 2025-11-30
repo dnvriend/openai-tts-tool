@@ -5,6 +5,8 @@ description = "A CLI that provides tts using OpenAI"
 requires-python = ">=3.14"
 dependencies = [
     "click>=8.1.7",
+    "openai>=1.40.0",
+    "pyaudio>=0.2.14",
 ]
 authors = [
     {name = "Dennis Vriend", email = "dvriend@ilionx.com"}
@@ -26,6 +28,7 @@ dev = [
     "pytest>=7.4.0",
     "bandit>=1.7.0",
     "pip-audit>=2.6.0",
+    "types-pyaudio>=0.2.14",
 ]
 
 [tool.ruff]
